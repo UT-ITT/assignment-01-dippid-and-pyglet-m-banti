@@ -49,6 +49,16 @@ def update(dt):
             player.x += current_speed # type: ignore
         else:
             pass
+    # left game border
+    if player.x < 0:
+        player.x = 0
+
+    # right game border
+    # width needs to be multiplied by 2 
+    # otherwise the border will appear in the middle of the window (half window size)
+    # if the player starts from the left border moving to the right
+    elif player.x > WINDOW_WIDTH*2 - player.width:
+        player.x = WINDOW_WIDTH*2 - player.width
 
     if sensor.has_capability('button_1'):
         button_pressed = sensor.get_value('button_1')
