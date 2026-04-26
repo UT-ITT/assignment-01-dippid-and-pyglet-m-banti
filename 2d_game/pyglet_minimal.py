@@ -24,6 +24,7 @@ def update(dt):
         # low value = phone handling is less sensitive
 
         bound = 1.5
+        max_speed = 5
 
         if abs(gravity_x) > bound: # type: ignore
 
@@ -34,8 +35,18 @@ def update(dt):
                 movement = gravity_x - bound # type: ignore
             else:
                 movement = gravity_x + bound # type: ignore
+
+            current_speed = movement * speed_factor
+            #to avoid infinite acceleration of player based on phone incline
+            # throttling of current speed to max_speed (right movement)
+            if current_speed > max_speed:
+                current_speed = max_speed
+            # throttling of current speed to max_speed (left movement)
+            elif current_speed < -max_speed:
+                current_speed = -max_speed
+
             # adds speed to the movement
-            player.x += gravity_x * speed_factor # type: ignore
+            player.x += current_speed # type: ignore
         else:
             pass
 
