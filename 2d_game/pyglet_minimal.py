@@ -17,7 +17,8 @@ def update(dt):
         gravity_data = sensor.get_value('gravity')
 
         if gravity_data is not None:
-            gravity_x = float(gravity_data['x'])
+            # needs to be negative, since without left incline would lead to right movement and vice versa
+            gravity_x = -float(gravity_data['x'])
         # avoids drifting problem on player
         # value between 0 and 9.81 (graity), high value = phone handling needs to be more steady, 
         # low value = phone handling is less sensitive
