@@ -12,15 +12,17 @@ win = window.Window(WINDOW_WIDTH, WINDOW_HEIGHT)
 player = shapes.Rectangle(400, 50, 50, 50, (255, 0, 0))
 
 def update(dt):
+    # get gravity x-axis data for left/right movement
     if sensor.has_capability('gravity'):
         gravity_data = sensor.get_value('gravity')
 
         if gravity_data is not None:
             gravity_x = float(gravity_data['x'])
-
+        # for better movement handling
         speed_factor = 3
+        # adds speed to the movement
         player.x += gravity_x * speed_factor # type: ignore
-
+    
     if sensor.has_capability('button_1'):
         button_pressed = sensor.get_value('button_1')
         if button_pressed == 1:
