@@ -18,11 +18,26 @@ def update(dt):
 
         if gravity_data is not None:
             gravity_x = float(gravity_data['x'])
+        # avoids drifting problem on player
+        # value between 0 and 9.81 (graity), high value = phone handling needs to be more steady, 
+        # low value = phone handling is less sensitive
+
+        bound = 1.5
+
+        if abs(gravity_x) > bound: # type: ignore
+
         # for better movement handling
-        speed_factor = 3
-        # adds speed to the movement
-        player.x += gravity_x * speed_factor # type: ignore
-    
+            speed_factor = 1.5
+
+            if gravity_x > 0: # type: ignore
+                movement = gravity_x - bound # type: ignore
+            else:
+                movement = gravity_x + bound # type: ignore
+            # adds speed to the movement
+            player.x += gravity_x * speed_factor # type: ignore
+        else:
+            pass
+
     if sensor.has_capability('button_1'):
         button_pressed = sensor.get_value('button_1')
         if button_pressed == 1:
