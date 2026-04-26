@@ -1,5 +1,5 @@
 import pyglet
-from pyglet import window, shapes
+from pyglet import window, resource
 import random
 from DIPPID import SensorUDP
 PORT = 5700
@@ -8,12 +8,42 @@ sensor = SensorUDP(PORT)
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
+resource.path = ['./assets']
+resource.reindex()
 win = window.Window(WINDOW_WIDTH, WINDOW_HEIGHT, caption="Marina Doodle")
 
 # functions as collection to draw a batch
 main_batch = pyglet.graphics.Batch()
 
-player = shapes.Rectangle(400, 50, 50, 50, (255, 0, 0), batch=main_batch)
+# get background asset
+bg_image = resource.image("background.png")
+
+# create background batch
+bg_batch = pyglet.graphics.Batch()
+
+bg_sprites = []
+
+# loop background image
+for i in range (2):
+    sprite = pyglet.sprite.Sprite(img=bg_image, x=0, y=i*600, batch=bg_batch)
+    bg_sprites.append(sprite)
+
+# get star asset
+player_image = resource.image("star.png")
+
+# set x-anchor of player
+player_image.anchor_x = player_image.width // 2
+
+# set y-anchor of player
+player_image.anchor_y = player_image.height // 2
+
+# get platform asset
+platform_image = resource.image("platform.png")
+
+# set star asset to player
+player = pyglet.sprite.Sprite(img=player_image, x=400, y=50, batch=main_batch)
+
+player.scale = 0.1
 
 # delta movement x-axis
 player_dx = 0
@@ -26,18 +56,23 @@ JUMP_FORCE = 12 # force of contact with floor/platttform
 platforms = []
 
 for i in range(10):
-    # sets random plattform position
+    # sets random platform position
     random_x = random.randint(0, WINDOW_WIDTH - 100)
     y_position = i * 80
-    # generates plattform
-    plat = shapes.Rectangle(random_x, y_position, 100, 15, (50, 220, 50), batch=main_batch)
+
+    # generates platform
+    # set platform asset
+    plat = pyglet.sprite.Sprite(img=platform_image, x=random_x, y=y_position, batch=main_batch)
+
+    plat.scale = 0.3
+
     platforms.append(plat)
 
 
 def update(dt):
     global player_dy, player_dx
 
-    # apply gravity to player frfom start
+    # apply gravity to player from start
     player_dy -= GRAVITY
 
     player.y += player_dy
@@ -49,18 +84,18 @@ def update(dt):
         player_dy = JUMP_FORCE
 
 
-    #plattform collision
-    # player jumps continously without input from plattform
+    #platform collision
+    # player jumps continously without input from platform
     if player_dy < 0:
         for p in platforms:
-            # check if player and plattforms overlap
+            # check if player and platforms overlap
             if(player.x < p.x + p.width and player.x + player.width > p.x and
             player.y < p.y + p.height and player.y + player.height > p.y):
-                # jump off plattform
+                # jump off platform
                 player.y = p.y + p.height
                 player_dy = JUMP_FORCE
                 player_dx *= 0.5
-                # since player can jump only from one plattform at once
+                # since player can jump only from one platform at once
                 break
     # get gravity x-axis data for left/right movement
     if sensor.has_capability('gravity'):
@@ -82,7 +117,6 @@ def update(dt):
                 
                 current_speed = movement * speed_factor
         
-
                 # throttling of current speed to max_speed
                 # right movement
                 if current_speed > max_speed:
@@ -100,7 +134,7 @@ def update(dt):
     elif player.x > WINDOW_WIDTH:
         player.x = -player.width
 
-    # endless scroll and plattform set up when player reaches window mid-height
+    # endless scroll and platform set up when player reaches window mid-height
     if player.y > WINDOW_HEIGHT / 2:
         
         difference = player.y - (WINDOW_HEIGHT / 2)
@@ -109,14 +143,21 @@ def update(dt):
 
         for p in platforms:
             p.y -= difference
-            # plattform recycling for scrolling
+            # platform recycling for scrolling
             if p.y < 0:
                 p.y = WINDOW_HEIGHT + random.randint(10, 50)
                 p.x = random.randint(0, WINDOW_WIDTH - int(p.width))
+        # loop for background image
+        for bg in bg_sprites:
+            bg.y -= difference
+            # background image recycling
+            if bg.y <= -600:
+                bg.y += 1200
 
 @win.event
 def on_draw():
     win.clear()
+    bg_batch.draw()
     main_batch.draw()
 # frame update
 pyglet.clock.schedule_interval(update, 1/60.0)
