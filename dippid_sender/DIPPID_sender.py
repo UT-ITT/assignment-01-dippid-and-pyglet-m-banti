@@ -28,9 +28,9 @@ def sim_gyroscope():
         "z": float(np.sin(t*1.75))
     }
 
-def sim_button():
-    # presses button randomly based on weighted probability 50%
-    return random.choices([0, 1], weights=[0.5, 0.5])[0]
+def sim_buttons():
+    # presses buttons randomly bewteen 1 to 4 based on weighted probability 50%
+    return {f"button_{i}": random.choices([0, 1], weights=[0.75, 0.25])[0] for i in range(1, 5)}
 
 while True:
     # message could be print directly in a long string like this,
@@ -41,7 +41,7 @@ while True:
     sensor_data = {
         "accelorometer": sim_accelerometer(),
         "gyroscope": sim_gyroscope(),
-        "button_1": sim_button()
+        "buttons": sim_buttons()
     }
     # convert dictionary in JSON-string
     message = json.dumps(sensor_data)
