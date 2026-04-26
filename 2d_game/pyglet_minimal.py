@@ -41,9 +41,20 @@ def update(dt):
 
     player.y += player_dy
 
+    #floor collision
     if player.y <= 0:
         player.y = 0
         player_dy = JUMP_FORCE
+
+
+    #plattform collision
+    if player_dy < 0:
+        for p in platforms:
+            if(player.x < p.x + p.width and player.x + player.width > p.x and
+            player.y < p.y + p.height and player.y + player.height > p.y):
+                player.y = p.y + p.height
+                player_dy = JUMP_FORCE
+                break
 
     if sensor.has_capability('gravity'):
         gravity_data = sensor.get_value('gravity')
