@@ -18,6 +18,16 @@ def sim_accelerometer():
         "z": float(np.sin(t*0.75))
     }
 
+# simulate gyroscope based on a cosinus curve (same Idea as before)
+def sim_gyroscope():
+    t = time.time()
+    # calculates orientation parameter based on time * weight
+    return {
+        "x": float(np.sin(t*1.5)),
+        "y": float(np.sin(t*0.5)),
+        "z": float(np.sin(t*1.75))
+    }
+
 def sim_button():
     # presses button randomly based on weighted probability 50%
     return random.choices([0, 1], weights=[0.5, 0.5])[0]
@@ -30,6 +40,7 @@ while True:
     # collect data in dictionary
     sensor_data = {
         "accelorometer": sim_accelerometer(),
+        "gyroscope": sim_gyroscope(),
         "button_1": sim_button()
     }
     # convert dictionary in JSON-string
