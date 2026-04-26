@@ -1,5 +1,6 @@
 import pyglet
 from pyglet import window, shapes
+import random
 from DIPPID import SensorUDP
 PORT = 5700
 sensor = SensorUDP(PORT)
@@ -7,11 +8,74 @@ sensor = SensorUDP(PORT)
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
-win = window.Window(WINDOW_WIDTH, WINDOW_HEIGHT)
+win = window.Window(WINDOW_WIDTH, WINDOW_HEIGHT, caption="Marina Doodle")
 
-player = shapes.Rectangle(400, 50, 50, 50, (255, 0, 0))
+main_batch = pyglet.graphics.Batch()
+
+player = shapes.Rectangle(400, 50, 50, 50, (255, 0, 0), batch=main_batch)
+
+
+player_dy = 0
+
+GRAVITY = 0.4
+
+JUMP_FORCE = 12
+
+
+platforms = []
+
+for i in range(10):
+
+    random_x = random.randint(0, WINDOW_WIDTH - 100)
+    y_position = i * 80
+
+    plat = shapes.Rectangle(random_x, y_position, 100, 15, (50, 220, 50), batch=main_batch)
+    platforms.append(plat)
+
 
 def update(dt):
+    global player_dy
+
+
+    player_dy -= GRAVITY
+
+    player.y += player_dy
+
+    if player.y <= 0:
+        player.y = 0
+        player_dy = JUMP_FORCE
+
+    if sensor.has_capability('gravity'):
+        gravity_data = sensor.get_value('gravity')
+
+        if gravity_data is not None:
+            gravity_x = -float(gravity_data['x'])
+
+            bound = 1.5
+            max_speed = 5
+            speed_factor = 1.5
+
+            if abs(gravity_x) > bound:
+                if gravity_x > 0:
+                    movement = gravity_x - bound
+                else:
+                    movement = gravity_x + bound
+                
+                current_speed = movement * speed_factor
+
+                if current_speed > max_speed:
+                    current_speed = max_speed
+                # throttling of current speed to max_speed (left movement)
+                elif current_speed < -max_speed:
+                    current_speed = -max_speed
+                
+                player.x += current_speed
+
+
+    
+
+
+"""def update(dt):
     # get gravity x-axis data for left/right movement
     if sensor.has_capability('gravity'):
         gravity_data = sensor.get_value('gravity')
@@ -64,13 +128,11 @@ def update(dt):
         button_pressed = sensor.get_value('button_1')
         if button_pressed == 1:
             player.y += 7
-
+"""
 
 @win.event
 def on_draw():
     win.clear()
     player.draw()
-
-pyglet.clock.schedule_interval(update, 1/60.0)
 
 pyglet.app.run()
